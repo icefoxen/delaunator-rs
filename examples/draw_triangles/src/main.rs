@@ -12,7 +12,7 @@ struct State {
 
 impl State {
     fn new(ctx: &mut ggez::Context) -> ggez::GameResult<Self> {
-        const NUM_POINTS: usize = 20;
+        const NUM_POINTS: usize = 100;
         const BOUNDS: f64 = 500.0;
 
         let points: Vec<_> = (0..NUM_POINTS)
@@ -28,16 +28,17 @@ impl State {
             .iter()
             .map(|i| na::Point2::new(points[*i].x as f32, points[*i].y as f32))
             .collect();
-        // let mesh = ggez::graphics::Mesh::new_circle(
-        //     ctx,
-        //     graphics::DrawMode::Fill,
-        //     na::Point2::new(0.0, 0.0),
-        //     100.0,
-        //     10.0,
-        // )?;
-        // let mesh = graphics::Mesh::from_triangles(ctx, &triangle_points)?;
-        let mesh =
-            graphics::Mesh::new_polyline(ctx, graphics::DrawMode::Line(2.0), &triangle_points)?;
+        let triangles = triangle_points.chunks(3);
+        let triangles = triangle_points.chunks(3);
+        let mut mb = graphics::MeshBuilder::new();
+        for triangle in triangles {
+            let r = rand::random::<f32>();
+            let g = rand::random::<f32>();
+            let b = rand::random::<f32>();
+            let color = graphics::Color::new(r, g, b, 1.0);
+            mb.polygon(graphics::DrawMode::Fill, triangle, color);
+        }
+        let mesh = mb.build(ctx)?;
         Ok(Self { mesh })
     }
 }
@@ -47,15 +48,20 @@ impl event::EventHandler for State {
         Ok(())
     }
     fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
-        graphics::draw(ctx, &self.mesh, na::Point2::new(50.0, 50.0), 0.0)?;
-        graphics::present(ctx);
+        graphics::draw(
+            ctx,
+            &self.mesh,
+            (na::Point2::new(50.0, 50.0), graphics::WHITE),
+        )?;
+        graphics::present(ctx)?;
         Ok(())
     }
 }
 
 fn main() {
-    let cb = ggez::ContextBuilder::new("draw_triangles", "ggez");
-    let ctx = &mut cb.build().unwrap();
-    let state = &mut State::new(ctx).unwrap();
-    event::run(ctx, state).unwrap();
+    let cb = ggez::ContextBuilder::new("draw_triangles", "ggez")
+        .window_setup(ggez::conf::WindowSetup::default().title("Delaunator!"));
+    let (mut ctx, mut ev) = cb.build().unwrap();
+    let state = &mut State::new(&mut ctx).unwrap();
+    event::run(&mut ctx, &mut ev, state).unwrap();
 }
