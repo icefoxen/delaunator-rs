@@ -1,0 +1,9 @@
+[package]
+name = "draw_triangles"
+version = "0.1.0"
+authors = ["Simon Heath <icefoxen@gmail.com>"]
+
+[dependencies]
+delaunator = {path="../../"}
+ggez = "0.4"
+rand = "0.5"
