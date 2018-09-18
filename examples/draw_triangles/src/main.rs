@@ -29,14 +29,13 @@ impl State {
             .map(|i| na::Point2::new(points[*i].x as f32, points[*i].y as f32))
             .collect();
         let triangles = triangle_points.chunks(3);
-        let triangles = triangle_points.chunks(3);
         let mut mb = graphics::MeshBuilder::new();
         for triangle in triangles {
             let r = rand::random::<f32>();
             let g = rand::random::<f32>();
             let b = rand::random::<f32>();
             let color = graphics::Color::new(r, g, b, 1.0);
-            mb.polygon(graphics::DrawMode::Fill, triangle, color);
+            mb.polygon(graphics::DrawMode::Fill, triangle, color)?;
         }
         let mesh = mb.build(ctx)?;
         Ok(Self { mesh })
@@ -48,6 +47,7 @@ impl event::EventHandler for State {
         Ok(())
     }
     fn draw(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
+        graphics::clear(ctx, graphics::BLACK);
         graphics::draw(
             ctx,
             &self.mesh,
